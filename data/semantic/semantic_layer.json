@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "sections": [
+    {
+      "title": "Metrics",
+      "entries": [
+        {
+          "id": "revenue",
+          "text": "Revenue = SUM(orders.final_amount) over orders with order_status = 'Delivered'. final_amount is the amount after discount (total_amount - discount_amount). Do not use orders.total_amount or payments.amount for revenue.",
+          "refs": ["orders.final_amount", "orders.order_status", "orders.total_amount", "orders.discount_amount", "payments.amount"],
+          "source": "gold:G16; data check",
+          "check_sql": "SELECT COUNT(*) = 0 FROM orders WHERE ABS(final_amount - (total_amount - discount_amount)) > 0.005"
+        },
+        {
+          "id": "restaurant_rating",
+          "text": "A restaurant's rating = AVG(ratings.rating) over its rows in ratings (join on restaurant_id). restaurants.avg_rating is a stored value that differs from that average for every restaurant (by more than 0.05); do not use it unless the question asks for the stored value.",
+          "refs": ["ratings.rating", "ratings.restaurant_id", "restaurants.restaurant_id", "restaurants.avg_rating"],
+          "source": "gold:G17; data check",
+          "check_sql": "SELECT COUNT(*) = (SELECT COUNT(*) FROM restaurants) FROM restaurants r JOIN (SELECT restaurant_id, AVG(rating) AS a FROM ratings GROUP BY restaurant_id) g ON g.restaurant_id = r.restaurant_id WHERE ABS(r.avg_rating - g.a) > 0.05"
+        }
+      ]
+    },
+    {
+      "title": "Conventions",
+      "entries": [
+        {
+          "id": "order_status",
+          "text": "orders.order_status is one of Placed, Preparing, Out for Delivery, Delivered, Cancelled. \"Not cancelled\" means order_status <> 'Cancelled'. Use orders.order_status for the status of an order; order_tracking holds the status-update history.",
+          "refs": ["orders.order_status", "order_tracking.status", "order_tracking.order_id"],
+          "source": "gold:G18; schema",
+          "check_sql": "SELECT COUNT(*) = 0 FROM orders WHERE order_status NOT IN ('Placed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled')"
+        },
+        {
+          "id": "successful_payment",
+          "text": "A payment is successful when payments.payment_status = 'Success' (other values: Pending, Failed, Refunded). Each order has exactly one payment (payments.order_id).",
+          "refs": ["payments.payment_status", "payments.order_id"],
+          "source": "gold:G19; data check",
+          "check_sql": "SELECT (SELECT COUNT(*) FROM payments WHERE payment_status = 'Success') > 0 AND (SELECT COUNT(DISTINCT payment_status) FROM payments) = 3 AND (SELECT COUNT(DISTINCT order_id) FROM payments) = (SELECT COUNT(*) FROM orders)"
+        },
+        {
+          "id": "coupon_used",
+          "text": "An order used a coupon when orders.coupon_id IS NOT NULL; the coupon is the coupons row with coupon_id = orders.coupon_id.",
+          "refs": ["orders.coupon_id", "coupons.coupon_id"],
+          "source": "gold:G20; data check",
+          "check_sql": "SELECT SUM(coupon_id IS NOT NULL) > 0 AND SUM(coupon_id IS NULL) > 0 FROM orders"
+        },
+        {
+          "id": "default_address",
+          "text": "A customer's default address is the customer_addresses row with is_default = 1; every customer has exactly one.",
+          "refs": ["customer_addresses.is_default", "customer_addresses.customer_id"],
+          "source": "gold:G07; data check",
+          "check_sql": "SELECT COUNT(*) = 0 FROM (SELECT customer_id FROM customer_addresses GROUP BY customer_id HAVING SUM(is_default = 1) <> 1)"
+        },
+        {
+          "id": "flags",
+          "text": "Flag columns hold 1 (true) or 0 (false): menu_items.is_veg, menu_items.is_available, and is_active on customers, restaurants, delivery_partners and coupons.",
+          "refs": ["menu_items.is_veg", "menu_items.is_available", "customers.is_active", "restaurants.is_active", "delivery_partners.is_active", "coupons.is_active"],
+          "source": "data check",
+          "check_sql": "SELECT (SELECT COUNT(*) FROM menu_items WHERE is_veg NOT IN (0, 1) OR is_available NOT IN (0, 1)) + (SELECT COUNT(*) FROM customers WHERE is_active NOT IN (0, 1)) + (SELECT COUNT(*) FROM restaurants WHERE is_active NOT IN (0, 1)) + (SELECT COUNT(*) FROM delivery_partners WHERE is_active NOT IN (0, 1)) + (SELECT COUNT(*) FROM coupons WHERE is_active NOT IN (0, 1)) = 0"
+        },
+        {
+          "id": "ratings_scope",
+          "text": "Ratings exist only for delivered orders, at most one per order (ratings.order_id).",
+          "refs": ["ratings.order_id", "orders.order_status"],
+          "source": "data check",
+          "check_sql": "SELECT (SELECT COUNT(*) FROM ratings g JOIN orders o ON o.order_id = g.order_id WHERE o.order_status <> 'Delivered') = 0 AND (SELECT COUNT(DISTINCT order_id) FROM ratings) = (SELECT COUNT(*) FROM ratings)"
+        },
+        {
+          "id": "unpopulated_column",
+          "text": "menu_items.created_at is always NULL (not populated); never filter, sort or group by it.",
+          "refs": ["menu_items.created_at"],
+          "source": "index; data check",
+          "check_sql": "SELECT COUNT(created_at) = 0 FROM menu_items"
+        }
+      ]
+    },
+    {
+      "title": "Aliases",
+      "entries": [
+        {
+          "id": "vegetarian",
+          "text": "\"vegetarian\" = menu_items.is_veg = 1; \"non-vegetarian\" = menu_items.is_veg = 0. \"active\" = is_active = 1. \"available\" (menu item) = menu_items.is_available = 1.",
+          "refs": ["menu_items.is_veg", "menu_items.is_available"],
+          "source": "schema; gold:G02,G03,G10"
+        },
+        {
+          "id": "name_columns",
+          "text": "Names: customers.full_name, delivery_partners.full_name, restaurants.name, menu_items.item_name, categories.category_name.",
+          "refs": ["customers.full_name", "delivery_partners.full_name", "restaurants.name", "menu_items.item_name", "categories.category_name"],
+          "source": "schema"
+        }
+      ]
+    },
+    {
+      "title": "Join guidance",
+      "entries": [
+        {
+          "id": "order_items_bridge",
+          "text": "order_items is the bridge between orders and menu_items (order_items.order_id -> orders, order_items.item_id -> menu_items). order_items.subtotal = quantity * price_at_order.",
+          "refs": ["order_items.order_id", "order_items.item_id", "order_items.subtotal", "order_items.quantity", "order_items.price_at_order"],
+          "source": "schema; gold:G10"
+        },
+        {
+          "id": "restaurant_links",
+          "text": "Both orders.restaurant_id and menu_items.restaurant_id reference restaurants. An order's customer is orders.customer_id; its delivery address is orders.address_id -> customer_addresses.",
+          "refs": ["orders.restaurant_id", "menu_items.restaurant_id", "orders.customer_id", "orders.address_id", "customer_addresses.address_id"],
+          "source": "schema; gold:G06,G07,G08"
+        }
+      ]
+    },
+    {
+      "title": "Ambiguities (ask which is meant unless the question says)",
+      "entries": [
+        {
+          "id": "city",
+          "text": "city exists in customer_addresses, restaurants and delivery_partners with no default; ask which city is meant.",
+          "refs": ["customer_addresses.city", "restaurants.city", "delivery_partners.city"],
+          "source": "schema"
+        }
+      ]
+    }
+  ]
+}

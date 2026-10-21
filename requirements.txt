@@ -1,0 +1,12 @@
+# Direct dependencies: Agentic Text-to-SQL. Conda env "text2sql", Python 3.11, Windows, CPU-only.
+# Validated 2026-10-21 by install + import tests. The complete environment is in requirements-freeze.txt.
+langgraph==1.2.14
+sqlglot==30.21.0
+sentence-transformers==6.1.0
+torch==2.14.1
+ollama==0.6.3
+rank-bm25==0.2.2
+# Transitive, pinned on purpose: the newest release was under a day old when these were chosen.
+transformers==5.19.0
+# Used directly by scripts/build_schema_index.py (also pulled in by torch/scikit-learn).
+numpy==2.4.6

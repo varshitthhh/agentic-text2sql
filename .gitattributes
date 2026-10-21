@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.npy binary
+*.jpg binary
+# recorded hashes (index metadata, run configs) are byte-sensitive: never rewrite line endings in data files
+data/** -text

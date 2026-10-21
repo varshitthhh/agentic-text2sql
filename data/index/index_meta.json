@@ -1,0 +1,144 @@
+{
+  "builder_script_sha256": "7377936d9640153ebd5ccb1a64b2d7e085c5f25629b91327041c1bbb853f3d88",
+  "documents": {
+    "count": 12,
+    "file": "schema_docs.jsonl",
+    "granularity": "table",
+    "sha256": "fa9db4edc34a642dd2c02a325b7ca1797f05938d72eda5fe1ce25bfc5f16ebfe",
+    "text_sha256": {
+      "categories": "ac2287a6b35b3c6cb3c012a839f6963914c844331e0d7b2680924ce6adb65cfe",
+      "coupons": "df7addcc1c7135d6d15d9c08156e1a894f248e32dc25204a7382e61e997b4c87",
+      "customer_addresses": "9e48655b1b8bbfccda39b31a5da1a483a331a8ad4716ba3045e1367b7b436829",
+      "customers": "4e18063a80c8516d0f43021a507c352f89e1821c72ad6e4bb9a9e2ad99aac48d",
+      "delivery_partners": "90b1a6d9eb2bc0d7d1dca8111192e38bfb4c2b896c9763b34b72756bca2a58e2",
+      "menu_items": "acc333b93484d0e59feeb68e389d2d44fcc2076c4683611bb3df9f8454955b7d",
+      "order_items": "ecb485d2c743689491c64620487da73b0e678d512cf1a1d07a0b91ae78e9edf5",
+      "order_tracking": "2b2096bc47bc723d3c9e68ca7fbdbd88dc2b4907c2c3db1baafc34072300d98a",
+      "orders": "375de5c700031d0339ceeee485fcb311c2f36561827f98d6c28256ea9cdca68b",
+      "payments": "3e0be4fa155729c7985f47351565e9e2002f7326dc4d224e75dda789200fa89c",
+      "ratings": "0b53739aaa042203325b5bae5ba6e1820cb6659f24c7024767dfb5d4745fa7e1",
+      "restaurants": "7b73d7e65815b369ae0bccac9d8f890ed0a8838ac349dbd60536292bad97a0ad"
+    }
+  },
+  "embeddings": {
+    "dtype": "float32",
+    "file": "schema_embeddings.npy",
+    "normalized": true,
+    "passage_instruction": null,
+    "row_order": "same as schema_docs.jsonl",
+    "sha256": "e11cd1cecec7ef43b58e27d422db81f452c487dc01b285b7453e6deb1dd5964e",
+    "shape": [
+      12,
+      384
+    ]
+  },
+  "excluded_columns": {
+    "categories": [
+      "description"
+    ],
+    "customer_addresses": [
+      "address_line",
+      "pincode"
+    ],
+    "customers": [
+      "full_name",
+      "email",
+      "phone",
+      "password_hash"
+    ],
+    "delivery_partners": [
+      "full_name",
+      "phone"
+    ],
+    "order_tracking": [
+      "notes"
+    ],
+    "ratings": [
+      "review_text"
+    ],
+    "restaurants": [
+      "email",
+      "phone"
+    ]
+  },
+  "libraries": {
+    "numpy": "2.4.6",
+    "python": "3.11.17",
+    "sentence-transformers": "6.1.0",
+    "torch": "2.14.1+cpu",
+    "transformers": "5.19.0"
+  },
+  "model": {
+    "id": "BAAI/bge-small-en-v1.5",
+    "max_seq_length": 512,
+    "pooling": "cls",
+    "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "token_counts": {
+      "categories": 88,
+      "coupons": 150,
+      "customer_addresses": 150,
+      "customers": 110,
+      "delivery_partners": 128,
+      "menu_items": 127,
+      "order_items": 115,
+      "order_tracking": 94,
+      "orders": 194,
+      "payments": 110,
+      "ratings": 110,
+      "restaurants": 155
+    }
+  },
+  "sample_values": {
+    "allowlist": {
+      "categories": [
+        "category_name"
+      ],
+      "coupons": [
+        "coupon_code"
+      ],
+      "customer_addresses": [
+        "city",
+        "state"
+      ],
+      "customers": [
+        "gender"
+      ],
+      "delivery_partners": [
+        "vehicle_type",
+        "city"
+      ],
+      "order_tracking": [
+        "status"
+      ],
+      "orders": [
+        "order_status"
+      ],
+      "payments": [
+        "payment_method",
+        "payment_status"
+      ],
+      "restaurants": [
+        "city",
+        "cuisine_type"
+      ]
+    },
+    "max_values_per_column": 12
+  },
+  "schema_version": 1,
+  "sources": {
+    "database": {
+      "path": "data/sqlite/food_delivery.sqlite",
+      "sha256": "7efa6e3a56098a02f86785ff666f0d13686d650e42dff7d7d1002d242d451e0c"
+    },
+    "source_sql": {
+      "01_schema.sql": {
+        "path": "data/source/01_schema.sql",
+        "sha256": "6a0e6266ea6ebb5c33dbf66afa2da6521981b725943b6f5a7800633f20db12a9"
+      },
+      "02_data.sql": {
+        "path": "data/source/02_data.sql",
+        "sha256": "4975b09b39e5d38305cd9d421d88ceff318c73f55dafdfd4959c96be930d2f91"
+      }
+    }
+  }
+}

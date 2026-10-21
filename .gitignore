@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Local environments
+.venv/
+venv/
+env/
+.conda/
+
+# Secrets and machine-specific files
+.env
+.env.*
+*.pem
+*.key
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.claude/
+
+# Model weights and caches (Ollama and Hugging Face keep these outside the project; excluded here in case of local copies)
+*.gguf
+*.safetensors
+*.bin
+*.pt
+.cache/
+huggingface/
+
+# Third-party data with unclear redistribution rights (see README, "Reproducing the database").
+# Regenerate locally from the pinned upstream commit.
+data/source/*.sql
+data/sqlite/
+*.sqlite
+*.sqlite.tmp
+*.db
+
+# Third-party paper (copyright held by its authors); see references/sources.md
+references/papers/
